@@ -210,6 +210,10 @@ namespace bgfx { namespace noop
 		{
 		}
 
+		void resizeFrameBuffer(FrameBufferHandle /*_handle*/, uint32_t /*_width*/, uint32_t /*_height*/, TextureFormat::Enum /*_format*/, TextureFormat::Enum /*_depthFormat*/) override
+		{
+		}
+
 		void destroyFrameBuffer(FrameBufferHandle /*_handle*/) override
 		{
 		}

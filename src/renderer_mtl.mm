@@ -1177,6 +1177,13 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 			fb.m_swapChain->resize(m_frameBuffers[_handle.idx], _width, _height, m_resolution.reset, m_resolution.maxFrameLatency);
 		}
 
+		void resizeFrameBuffer(FrameBufferHandle _handle, uint32_t _width, uint32_t _height, TextureFormat::Enum _format, TextureFormat::Enum _depthFormat) override
+		{
+			auto nwh = m_frameBuffers[_handle.idx].m_nwh;
+			destroyFrameBuffer(_handle);
+			createFrameBuffer(_handle, nwh, _width, _height, _format, _depthFormat);
+		}
+
 		void destroyFrameBuffer(FrameBufferHandle _handle) override
 		{
 			uint16_t denseIdx = m_frameBuffers[_handle.idx].destroy();

@@ -3284,6 +3284,35 @@ namespace bgfx
 				}
 				break;
 
+			case CommandBuffer::ResizeFrameBuffer:
+			{
+				BGFX_PROFILER_SCOPE("ResizeFrameBuffer", 0xff2040ff);
+
+				FrameBufferHandle handle;
+				_cmdbuf.read(handle);
+
+				bool window;
+				_cmdbuf.read(window);
+
+				if (window)
+				{
+					uint16_t width;
+					_cmdbuf.read(width);
+
+					uint16_t height;
+					_cmdbuf.read(height);
+
+					TextureFormat::Enum format;
+					_cmdbuf.read(format);
+
+					TextureFormat::Enum depthFormat;
+					_cmdbuf.read(depthFormat);
+
+					m_renderCtx->resizeFrameBuffer(handle, width, height, format, depthFormat);
+				}
+			}
+			break;
+
 			case CommandBuffer::DestroyFrameBuffer:
 				{
 					BGFX_PROFILER_SCOPE("DestroyFrameBuffer", 0xff2040ff);
@@ -5124,6 +5153,25 @@ namespace bgfx
 			, _format
 			, _depthFormat
 			);
+	}
+
+	void resizeFrameBuffer(FrameBufferHandle _handle, uint16_t _width, uint16_t _height, TextureFormat::Enum _format, TextureFormat::Enum _depthFormat)
+	{
+		BGFX_CHECK_CAPS(BGFX_CAPS_SWAP_CHAIN, "Swap chain is not supported!");
+		BX_WARN(_width > 0 && _height > 0
+			, "Invalid frame buffer dimensions (width %d, height %d)."
+			, _width
+			, _height
+		);
+		BX_ASSERT(_format == TextureFormat::Count || bimg::isColor(bimg::TextureFormat::Enum(_format))
+			, "Invalid texture format for color (%s)."
+			, bimg::getName(bimg::TextureFormat::Enum(_format))
+		);
+		BX_ASSERT(_depthFormat == TextureFormat::Count || bimg::isDepth(bimg::TextureFormat::Enum(_depthFormat))
+			, "Invalid texture format for depth (%s)."
+			, bimg::getName(bimg::TextureFormat::Enum(_depthFormat))
+		);
+		s_ctx->resizeFrameBuffer(_handle, _width, _height, _format, _depthFormat);
 	}
 
 	void setName(FrameBufferHandle _handle, const char* _name, int32_t _len)

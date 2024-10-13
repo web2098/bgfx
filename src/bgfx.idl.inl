@@ -556,6 +556,12 @@ BGFX_C_API bgfx_frame_buffer_handle_t bgfx_create_frame_buffer_from_nwh(void* _n
 	return handle_ret.c;
 }
 
+BGFX_C_API void bgfx_resize_frame_buffer(bgfx_frame_buffer_handle_t _handle, uint16_t _width, uint16_t _height, bgfx_texture_format_t _format, bgfx_texture_format_t _depthFormat)
+{
+	union { bgfx_frame_buffer_handle_t c; bgfx::FrameBufferHandle cpp; } handle_ret;
+	bgfx::resizeFrameBuffer(_handle, _width, _height, (bgfx::TextureFormat::Enum)_format, (bgfx::TextureFormat::Enum)_depthFormat);
+}
+
 BGFX_C_API void bgfx_set_frame_buffer_name(bgfx_frame_buffer_handle_t _handle, const char* _name, int32_t _len)
 {
 	union { bgfx_frame_buffer_handle_t c; bgfx::FrameBufferHandle cpp; } handle = { _handle };
@@ -1357,6 +1363,7 @@ BGFX_C_API bgfx_interface_vtbl_t* bgfx_get_interface(uint32_t _version)
 			bgfx_create_frame_buffer_from_handles,
 			bgfx_create_frame_buffer_from_attachment,
 			bgfx_create_frame_buffer_from_nwh,
+			bgfx_resize_frame_buffer,
 			bgfx_set_frame_buffer_name,
 			bgfx_get_texture,
 			bgfx_destroy_frame_buffer,

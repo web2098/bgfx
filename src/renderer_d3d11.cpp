@@ -1943,6 +1943,11 @@ namespace bgfx { namespace d3d11
 			m_frameBuffers[_handle.idx].create(denseIdx, _nwh, _width, _height, _format, _depthFormat);
 		}
 
+		void resizeFrameBuffer(FrameBufferHandle _handle, uint32_t _width, uint32_t _height, TextureFormat::Enum _format, TextureFormat::Enum _depthFormat) override
+		{
+			m_frameBuffers[_handle.idx].resize(_width, _height, _format, _depthFormat);
+		}
+
 		void destroyFrameBuffer(FrameBufferHandle _handle) override
 		{
 			uint16_t denseIdx = m_frameBuffers[_handle.idx].destroy();
@@ -4976,6 +4981,44 @@ namespace bgfx { namespace d3d11
 		m_nwh      = _nwh;
 		m_denseIdx = _denseIdx;
 		m_num      = 1;
+	}
+
+	void FrameBufferD3D11::resize(uint32_t _width, uint32_t _height, TextureFormat::Enum _format, TextureFormat::Enum _depthFormat)
+	{
+		preReset(true);
+		DXGI_SWAP_CHAIN_DESC1 scd;
+		m_swapChain->GetDesc1(&scd);
+		scd.Format = TextureFormat::Count == _format ? scd.Format : s_textureFormat[_format].m_fmt;
+		auto hr = m_swapChain->ResizeBuffers(scd.BufferCount, _width, _height, scd.Format, scd.Flags);
+		BGFX_FATAL(SUCCEEDED(hr), Fatal::UnableToInitialize, "Failed to resize swap chain.");
+
+		ID3D11Device* device = s_renderD3D11->m_device;
+
+		ID3D11Resource* ptr;
+		DX_CHECK(m_swapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&ptr));
+		DX_CHECK(device->CreateRenderTargetView(ptr, NULL, &m_rtv[0]));
+		DX_RELEASE(ptr, 0);
+
+		DXGI_FORMAT fmtDsv = bimg::isDepth(bimg::TextureFormat::Enum(_depthFormat))
+			? s_textureFormat[_depthFormat].m_fmtDsv
+			: DXGI_FORMAT_D24_UNORM_S8_UINT
+			;
+		D3D11_TEXTURE2D_DESC dsd;
+		dsd.Width = _width;
+		dsd.Height = _height;
+		dsd.MipLevels = 1;
+		dsd.ArraySize = 1;
+		dsd.Format = fmtDsv;
+		dsd.SampleDesc = s_renderD3D11->m_scd.sampleDesc;
+		dsd.Usage = D3D11_USAGE_DEFAULT;
+		dsd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		dsd.CPUAccessFlags = 0;
+		dsd.MiscFlags = 0;
+
+		ID3D11Texture2D* depthStencil;
+		DX_CHECK(device->CreateTexture2D(&dsd, NULL, &depthStencil));
+		DX_CHECK(device->CreateDepthStencilView(depthStencil, NULL, &m_dsv));
+		DX_RELEASE(depthStencil, 0);
 	}
 
 	uint16_t FrameBufferD3D11::destroy()
