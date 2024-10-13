@@ -3522,6 +3522,13 @@ namespace bgfx { namespace gl
 			m_frameBuffers[_handle.idx].create(denseIdx, _nwh, _width, _height, _format, _depthFormat);
 		}
 
+		void resizeFrameBuffer(FrameBufferHandle _handle, uint32_t _width, uint32_t _height, TextureFormat::Enum _format, TextureFormat::Enum _depthFormat) override
+		{
+			auto nwh = m_frameBuffers[_handle.idx].m_nwh;
+			destroyFrameBuffer(_handle);
+			createFrameBuffer(_handle, nwh, _width, _height, _format, _depthFormat);
+		}
+
 		void destroyFrameBuffer(FrameBufferHandle _handle) override
 		{
 			uint16_t denseIdx = m_frameBuffers[_handle.idx].destroy();
@@ -7155,6 +7162,7 @@ namespace bgfx { namespace gl
 	{
 		BX_UNUSED(_format, _depthFormat);
 		m_swapChain = s_renderGL->m_glctx.createSwapChain(_nwh, _width, _height);
+		m_nwh       = _nwh;
 		m_width     = _width;
 		m_height    = _height;
 		m_numTh     = 0;

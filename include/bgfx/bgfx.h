@@ -3175,6 +3175,23 @@ namespace bgfx
 		, TextureFormat::Enum _depthFormat = TextureFormat::Count
 		);
 
+	/// Resize an existing frame buffer
+	/// @param[in] _handle Frame buffer handle
+	/// @param[in] _width Frame buffer width
+	/// @param[in] _height Frame buffer height
+	/// @param[in] _format Texture format
+	/// @param[in] _depthFormat Depth texture format
+	///
+	/// @attention C99's equivalent binding is `bgfx_resize_frame_buffer`.
+	void resizeFrameBuffer(
+		FrameBufferHandle
+		, uint16_t _width
+		, uint16_t _height
+		, TextureFormat::Enum _format = TextureFormat::Count
+		, TextureFormat::Enum _depthFormat = TextureFormat::Count
+	);
+
+
 	/// Set frame buffer debug name.
 	///
 	/// @param[in] _handle frame buffer handle.
